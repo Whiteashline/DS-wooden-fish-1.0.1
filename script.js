@@ -1,120 +1,108 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Microsoft YaHei', sans-serif;
-    background-image: url('assets/images/bg.jpg');
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    touch-action: manipulation;
-    user-select: none;
-    overflow: hidden;
-}
+// 初始化变量
+let count = 0;
+let currentSkin = 'skin1.png';
+const woodenFish = document.getElementById('wooden-fish');
+const counter = document.getElementById('counter');
+const skinSelector = document.getElementById('skin-selector');
+const skinMenu = document.getElementById('skin-menu');
 
-#container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+// 加载音效
+const sound = new Howl({
+    src: ['assets/audio/knock.m4a'],
+    volume: 0.7
+});
 
-#wooden-fish {
-    width: 300px;
-    height: 300px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    cursor: pointer;
-    transition: transform 0.1s;
-    position: relative;
-    background-image: url('assets/images/skins/skin1.png');
-}
-
-#wooden-fish:active {
-    transform: scale(0.95);
-}
-
-#counter {
-    font-size: 36px;
-    color: #fff;
-    text-shadow: 0 0 10px rgba(0, 0, 255, 0.7);
-    margin-top: 20px;
-    background-color: rgba(0, 0, 0, 0.5);
-    padding: 10px 20px;
-    border-radius: 10px;
-}
-
-.particle {
-    position: absolute;
-    color: #00a8ff;
-    font-size: 20px;
-    pointer-events: none;
-    animation: float-up 1.5s ease-out forwards;
-    opacity: 0;
-}
-
-@keyframes float-up {
-    0% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-100px);
-        opacity: 0;
+// 从本地存储加载计数
+function loadCount() {
+    const savedCount = localStorage.getItem('woodenFishCount');
+    if (savedCount) {
+        count = parseInt(savedCount);
+        counter.textContent = `功德: ${count}`;
     }
 }
 
-#skin-selector {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 100;
+// 保存计数到本地存储
+function saveCount() {
+    localStorage.setItem('woodenFishCount', count.toString());
 }
 
-#skin-selector:hover {
-    background-color: rgba(255, 255, 255, 0.9);
+// 创建粒子效果
+function createParticle() {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.textContent = '功德+1';
+    
+    // 随机位置
+    const x = Math.random() * 200 - 100;
+    particle.style.left = `calc(50% + ${x}px)`;
+    particle.style.top = '50%';
+    
+    document.getElementById('container').appendChild(particle);
+    
+    // 动画结束后移除粒子
+    setTimeout(() => {
+        particle.remove();
+    }, 1500);
 }
 
-#skin-menu {
-    position: absolute;
-    top: 70px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 10px;
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 100;
+// 点击木鱼事件
+function tapWoodenFish() {
+    // 播放音效
+    sound.play();
+    
+    // 增加计数
+    count++;
+    counter.textContent = `功德: ${count}`;
+    
+    // 保存计数
+    saveCount();
+    
+    // 创建粒子效果
+    createParticle();
+    
+    // 添加点击动画
+    woodenFish.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+        woodenFish.style.transform = 'scale(1)';
+    }, 100);
 }
 
-.skin-option {
-    width: 60px;
-    height: 60px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 5px;
-    cursor: pointer;
-    border: 2px solid transparent;
+// 更换皮肤
+function changeSkin(skin) {
+    currentSkin = skin;
+    woodenFish.style.backgroundImage = `url('assets/images/skins/${skin}')`;
+    localStorage.setItem('woodenFishSkin', skin);
 }
 
-.skin-option:hover {
-    border-color: #00a8ff;
+// 初始化应用
+function init() {
+    // 加载计数
+    loadCount();
+    
+    // 加载皮肤
+    const savedSkin = localStorage.getItem('woodenFishSkin');
+    if (savedSkin) {
+        currentSkin = savedSkin;
+    }
+    woodenFish.style.backgroundImage = `url('assets/images/skins/${currentSkin}')`;
+    
+    // 设置点击事件
+    woodenFish.addEventListener('click', tapWoodenFish);
+    
+    // 皮肤选择器事件
+    skinSelector.addEventListener('click', () => {
+        skinMenu.style.display = skinMenu.style.display === 'flex' ? 'none' : 'flex';
+    });
+    
+    // 皮肤选项事件
+    document.querySelectorAll('.skin-option').forEach(option => {
+        option.style.backgroundImage = `url('assets/images/skins/${option.dataset.skin}')`;
+        option.addEventListener('click', () => {
+            changeSkin(option.dataset.skin);
+            skinMenu.style.display = 'none';
+        });
+    });
 }
+
+// 启动应用
+document.addEventListener('DOMContentLoaded', init);
