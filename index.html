@@ -1,16 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>电子木鱼</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <title>电子木鱼 - 功德无量</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-image: url('1746586726549.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+            user-select: none;
+            overflow: hidden;
+        }
+        
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #wooden-fish {
+            width: 300px;
+            height: 300px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            position: relative;
+        }
+        
+        #wooden-fish:active {
+            transform: scale(0.95);
+        }
+        
+        #counter {
+            font-size: 36px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 0, 255, 0.7);
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        
+        .particle {
+            position: absolute;
+            color: #00a8ff;
+            font-size: 20px;
+            pointer-events: none;
+            animation: float-up 1.5s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes float-up {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+        }
+        
+        #skin-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+        }
+        
+        #skin-selector:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        #skin-menu {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 100;
+        }
+        
+        .skin-option {
+            width: 60px;
+            height: 60px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            border-radius: 5px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .skin-option:hover {
+            border-color: #00a8ff;
+        }
+    </style>
 </head>
 <body>
-    <div id="counter">功德：<span id="count">0</span></div>
-    <div id="muyu"></div>
-    <canvas id="particles"></canvas>
-    <button id="skinBtn">换肤</button>
-    
-    <script src="script.js"></script>
+    <div id="container">
+        <div id="skin-selector">🎨</div>
+        <div id="skin-menu">
+            <div class="skin-option" data-skin="沧渊诵波1746586965929.png"></div>
+            <div class="skin-option" data-skin="素木听潮1746588282601.png"></div>
+            <div class="skin-option" data-skin="蓝鲸禅心IMG_20250507_112353.png"></div>
+            <div class="skin-option" data-skin="木韵鲸鸣IMG_20250507_112715.png"></div>
+        </div>
+        
+        <div id="wooden-fish"></div>
+        <div id="counter">功德: 0</div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script>
+        // 初始化变量
+        let count = 0;
+        let currentSkin = '沧渊诵波1746586965929.png';
+        const woodenFish = document.getElementById('wooden-fish');
+        const counter = document.getElementById('counter');
+        const skinSelector = document.getElementById('skin-selector');
+        const skinMenu = document.getElementById('skin-menu');
+        
+        // 加载音效
+        const sound = new Howl({
+            src: ['5月7日 下午12点20分.m4a'],
+            volume: 0.7
+        });
+        
+        // 从本地存储加载计数
+        function loadCount() {
+            const savedCount = localStorage.getItem('woodenFishCount');
+            if (savedCount) {
+                count = parseInt(savedCount);
+                counter.textContent = `功德: ${count}`;
+            }
+        }
+        
+        // 保存计数到本地存储
+        function saveCount() {
+            localStorage.setItem('woodenFishCount', count.toString());
+        }
+        
+        // 创建粒子效果
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.textContent = '功德+1';
+            
+            // 随机位置
+            const x = Math.random() * 200 - 100;
+            particle.style.left = `calc(50% + ${x}px)`;
+            particle.style.top = '50%';
+            
+            document.getElementById('container').appendChild(particle);
+            
+            // 动画结束后移除粒子
+            setTimeout(() => {
+                particle.remove();
+            }, 1500);
+        }
+        
+        // 点击木鱼事件
+        function tapWoodenFish() {
+            // 播放音效
+            sound.play();
+            
+            // 增加计数
+            count++;
+            counter.textContent = `功德: ${count}`;
+            
+            // 保存计数
+            saveCount();
+            
+            // 创建粒子效果
+            createParticle();
+            
+            // 添加点击动画
+            woodenFish.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                woodenFish.style.transform = 'scale(1)';
+            }, 100);
+        }
+        
+        // 更换皮肤
+        function changeSkin(skin) {
+            currentSkin = skin;
+            woodenFish.style.backgroundImage = `url('${skin}')`;
+            localStorage.setItem('woodenFishSkin', skin);
+        }
+        
+        // 初始化应用
+        function init() {
+            // 加载计数
+            loadCount();
+            
+            // 加载皮肤
+            const savedSkin = localStorage.getItem('woodenFishSkin');
+            if (savedSkin) {
+                currentSkin = savedSkin;
+            }
+            woodenFish.style.backgroundImage = `url('${currentSkin}')`;
+            
+            // 设置点击事件
+            woodenFish.addEventListener('click', tapWoodenFish);
+            
+            // 皮肤选择器事件
+            skinSelector.addEventListener('click', () => {
+                skinMenu.style.display = skinMenu.style.display === 'flex' ? 'none' : 'flex';
+            });
+            
+            // 皮肤选项事件
+            document.querySelectorAll('.skin-option').forEach(option => {
+                option.style.backgroundImage = `url('${option.dataset.skin}')`;
+                option.addEventListener('click', () => {
+                    changeSkin(option.dataset.skin);
+                    skinMenu.style.display = 'none';
+                });
+            });
+        }
+        
+        // 启动应用
+        init();
+    </script>
 </body>
 </html>
