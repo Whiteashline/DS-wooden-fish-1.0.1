@@ -7,14 +7,39 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <img id="background" src="1746586726549.jpg" alt="背景">
-    <button id="skinBtn">换肤</button>
-    <div id="counter">0</div>
-    <img id="muyu" src="1746586965929.png" alt="木鱼" class="hit-animation">
-    
-    <audio id="sound">
-        <source src="5月7日%20下午12点20分.m4a" type="audio/mp4">
-    </audio>
+    <div class="app-container">
+        <div id="woodenFishContainer">
+            <img id="woodenFish" src="1746586965929.png" alt="Wooden Fish">
+            <div id="effectAnchor"></div>
+        </div>
+        <div id="counterDisplay">功德: <span id="count">0</span></div>
+    </div>
+
+    <button id="skinChangeButton" aria-label="更换皮肤">⚙️</button>
+    <div id="skinSelector" class="hidden">
+        <h3>选择皮肤</h3>
+        <div class="skin-options-grid">
+            <div class="skin-option" data-skin-name="沧渊诵波" data-skin-file="1746586965929.png">
+                <img src="1746586965929.png" alt="沧渊诵波">
+                <span>沧渊诵波</span>
+            </div>
+            <div class="skin-option" data-skin-name="素木听潮" data-skin-file="1746588282601.png">
+                <img src="1746588282601.png" alt="素木听潮">
+                <span>素木听潮</span>
+            </div>
+            <div class="skin-option" data-skin-name="蓝鲸禅心" data-skin-file="IMG_20250507_112353.png">
+                <img src="IMG_20250507_112353.png" alt="蓝鲸禅心">
+                <span>蓝鲸禅心</span>
+            </div>
+            <div class="skin-option" data-skin-name="木韵鲸鸣" data-skin-file="IMG_20250507_112715.png">
+                <img src="IMG_20250507_112715.png" alt="木韵鲸鸣">
+                <span>木韵鲸鸣</span>
+            </div>
+        </div>
+        <button id="closeSkinSelector">关闭</button>
+    </div>
+
+    <audio id="hitSound" src="5月7日 下午12点20分.m4a" preload="auto"></audio>
 
     <script src="script.js"></script>
 </body>
